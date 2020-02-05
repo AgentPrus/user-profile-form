@@ -1,25 +1,51 @@
 <?php
 
-$inputData = [
-    'firstName' => $_POST['firstName'],
-    'lastName' => $_POST['lastName'],
-    'dateOfBirth' => $_POST['dateOfBirth'],
-    'options' => $_POST['options'],
-    'personalInfo' => $_POST['personalInfo'],
+$errorMsg = '';
+$success = false;
 
-];
+// Check for submit form
+if (filter_has_var(INPUT_POST, 'submit')) {
 
-$checkBoxesData = !empty($_POST['check_boxes_list']) ? $_POST['check_boxes_list'] : [];
-if (count($checkBoxesData) > 0) {
-    array_push($inputData, $checkBoxesData);
+    // Get form data
+    $firstName = $_POST['firstName'];
+    $lastName = $_POST['lastName'];
+    $personalInfo = $_POST['personalInfo'];
+
+    // Validate user input
+    if (empty($firstName) || empty($lastName) || empty($personalInfo)) {
+        $errorMsg = '<strong>First Name, Last Name, Personal Info</strong> are required fields';
+    } elseif (empty($firstName) || !ctype_alpha($firstName) || strlen($firstName) > 60) {
+        $errorMsg = '<strong>First name</strong> should contain only English letters and not greater than 60 chars';
+    } elseif (empty($lastName) || !ctype_alpha($lastName) || strlen($lastName) > 60) {
+        $errorMsg = '<strong>Last name</strong> should contain only English letters and not greater than 60 chars';
+    } elseif (strlen($personalInfo) > 500) {
+        $errorMsg = '<strong>Personal info</strong> cannot be greater than 500 chars';
+    } else {
+        $success = true;
+    }
 }
-
-print_r($inputData);
 ?>
 
 <?php include('include/header.inc.php'); ?>
-    <div class="container">
-        <form action="index.php" method="post">
+    <div class="container pt-5">
+        <h1>Profile Form</h1>
+        <hr>
+        <?php if ($errorMsg != ''): ?>
+            <div class="alert alert-danger <?php echo $errorMsg ?>" role="alert"> <?php echo $errorMsg; ?>
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        <?php endif; ?>
+        <?php if ($success): ?>
+            <div class="alert alert-success <?php echo $errorMsg ?>" role="alert"><h4 class="alert-heading">Well
+                    done!</h4> <?php echo "Thank You {$firstName} {$lastName}"; ?>
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        <?php endif; ?>
+        <form action="<?php htmlspecialchars($_SERVER['PHP_SELF']) ?>" method="post">
             <div class="form-group">
                 <label class="col-sm-2 col-form-label">First Name</label>
                 <div class="col-sm-5">
@@ -42,7 +68,7 @@ print_r($inputData);
             <fieldset class="form-group col">
                 <legend>Are you working now?</legend>
                 <div class="form-check">
-                    <input type="radio" class="form-check-input" name="options" value="No" checked>
+                    <input type="radio" class="form-check-input" name="options" value="No">
                     <label class="form-check-label">Yes</label>
                 </div>
                 <div class="form-check">
@@ -79,7 +105,7 @@ print_r($inputData);
             </div>
 
             <div class="form-group col">
-                <input type="submit" class="btn-dark">
+                <input type="submit" class="btn-dark" name="submit">
             </div>
         </form>
     </div>

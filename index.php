@@ -1,28 +1,71 @@
 <?php
 
-$errorMsg = '';
-$success = false;
+$errorMsg = [];
+$firstName = '';
+$lastName = '';
+$personalInfo = '';
+
+$isFirstNameValid = false;
+$isLastNameValid = false;
+$isPersonalInfoValid = false;
+
+function validateFirstNameForm($array, $firstName)
+{
+    if (empty($firstName)) {
+        array_push($array, 'First name is required field');
+    }
+    if (!preg_match('/^[A-Za-z]+$/', $firstName)) {
+        array_push($array, 'First name should contain only English letters');
+    }
+    if (strlen($firstName) > 60) {
+        array_push($array, 'First name cannot be greater than 60 chars');
+    }
+    return $array;
+}
+
+function validateLastNameForm($array, $lastName)
+{
+    if (empty($lastName)) {
+        array_push($array, 'Last name is required field');
+    }
+    if (!preg_match('/^[A-Za-z]+$/', $lastName)) {
+        array_push($array, 'Last name should contain only English letters');
+    }
+    if (strlen($lastName) > 60) {
+        array_push($array, 'Last name cannot be greater than 60 chars');
+    }
+    return $array;
+}
+
+function validatePersonalInfoForm($array, $personalInfo)
+{
+    if (empty($personalInfo)) {
+        array_push($array, 'Personal in is required field');
+    }
+    if (strlen($personalInfo) > 500) {
+        array_push($array, 'Personal in cannot be greater than 500 chars');
+    }
+    return $array;
+}
+
 
 // Check for submit form
 if (filter_has_var(INPUT_POST, 'submit')) {
 
-    // Get form data
-    $firstName = $_POST['firstName'];
-    $lastName = $_POST['lastName'];
-    $personalInfo = $_POST['personalInfo'];
-
     // Validate user input
-    if (empty($firstName) || empty($lastName) || empty($personalInfo)) {
-        $errorMsg = '<strong>First Name, Last Name, Personal Info</strong> are required fields';
-    } elseif (empty($firstName) || !ctype_alpha($firstName) || strlen($firstName) > 60) {
-        $errorMsg = '<strong>First name</strong> should contain only English letters and not greater than 60 chars';
-    } elseif (empty($lastName) || !ctype_alpha($lastName) || strlen($lastName) > 60) {
-        $errorMsg = '<strong>Last name</strong> should contain only English letters and not greater than 60 chars';
-    } elseif (strlen($personalInfo) > 500) {
-        $errorMsg = '<strong>Personal info</strong> cannot be greater than 500 chars';
-    } else {
-        $success = true;
+    if (isset($_POST) && !empty($_POST)) {
+        $firstName = $_POST['firstName'];
+        $lastName = $_POST['lastName'];
+        $personalInfo = $_POST['personalInfo'];
     }
+
+    $isFirstNameValid = !empty(validateFirstNameForm($errorMsg, $firstName));
+    $isLastNameValid = !empty(validateLastNameForm($errorMsg, $lastName));
+    $isPersonalInfoValid = !empty(validatePersonalInfoForm($errorMsg, $personalInfo));
+
+    $errorMsg = validateFirstNameForm($errorMsg, $firstName);
+    $errorMsg = validateLastNameForm($errorMsg, $lastName);
+    $errorMsg = validatePersonalInfoForm($errorMsg, $personalInfo);
 }
 ?>
 
@@ -30,16 +73,19 @@ if (filter_has_var(INPUT_POST, 'submit')) {
     <div class="container pt-5">
         <h1>Profile Form</h1>
         <hr>
-        <?php if ($errorMsg != ''): ?>
-            <div class="alert alert-danger <?php echo $errorMsg ?>" role="alert"> <?php echo $errorMsg; ?>
+        <?php if (!empty($errorMsg)): ?>
+            <div class="alert alert-danger" role="alert">
                 <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
+                <?php foreach ($errorMsg as $error): ?>
+                    <p><?php echo $error ?></p>
+                <?php endforeach; ?>
             </div>
         <?php endif; ?>
-        <?php if ($success): ?>
-            <div class="alert alert-success <?php echo $errorMsg ?>" role="alert"><h4 class="alert-heading">Well
-                    done!</h4> <?php echo "Thank You {$firstName} {$lastName}"; ?>
+        <?php if (filter_has_var(INPUT_POST, 'submit') && empty($errorMsg)): ?>
+            <div class="alert alert-success" role="alert"><h4 class="alert-heading">Well
+                    done!</h4> <?php echo "Thank You {$_POST['firstName']} {$_POST['lastName']}"; ?>
                 <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -49,13 +95,15 @@ if (filter_has_var(INPUT_POST, 'submit')) {
             <div class="form-group">
                 <label class="col-sm-2 col-form-label">First Name</label>
                 <div class="col-sm-5">
-                    <input type="text" class="form-control" placeholder="First Name" name="firstName">
+                    <input type="text" class="form-control" placeholder="First Name" name="firstName"
+                           value="<?php if ($isFirstNameValid) echo $firstName; ?>">
                 </div>
             </div>
             <div class="form-group">
                 <label class="col-sm-5 col-form-label">Last Name</label>
                 <div class="col-sm-5 col-form-label">
-                    <input type="text" class="form-control" placeholder="Last Name" name="lastName">
+                    <input type="text" class="form-control" placeholder="Last Name" name="lastName"
+                           value="<?php if ($isLastNameValid) echo $lastName; ?>">
                 </div>
             </div>
             <div class="form-group">
@@ -100,8 +148,9 @@ if (filter_has_var(INPUT_POST, 'submit')) {
                 </div>
             </fieldset>
             <div class="form-group col">
-                <label>Personal info info</label>
-                <textarea class="form-control" name="personalInfo" rows="3"></textarea>
+                <label>Personal info</label>
+                <textarea class="form-control" name="personalInfo" rows="3"
+                          placeholder="<?php if ($isPersonalInfoValid) echo $personalInfo; ?>"></textarea>
             </div>
 
             <div class="form-group col">

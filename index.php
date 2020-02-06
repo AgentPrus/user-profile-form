@@ -1,71 +1,50 @@
 <?php
 
-$errorMsg = [];
-$firstName = '';
-$lastName = '';
-$personalInfo = '';
-
-$isFirstNameValid = false;
-$isLastNameValid = false;
-$isPersonalInfoValid = false;
-
-function validateFirstNameForm($array, $firstName)
+function isFieldEmpty($fieldName, $filedValue)
 {
-    if (empty($firstName)) {
-        array_push($array, 'First name is required field');
+    if (empty($filedValue)) {
+        return "$fieldName is required";
     }
-    if (!preg_match('/^[A-Za-z]+$/', $firstName)) {
-        array_push($array, 'First name should contain only English letters');
-    }
-    if (strlen($firstName) > 60) {
-        array_push($array, 'First name cannot be greater than 60 chars');
-    }
-    return $array;
 }
 
-function validateLastNameForm($array, $lastName)
+function validateField($filedValue, $filedName)
 {
-    if (empty($lastName)) {
-        array_push($array, 'Last name is required field');
+    if (!empty($filedValue) && !preg_match('/^[A-Za-z]+$/', $filedValue)) {
+        return "$filedName should contain only English letters";
     }
-    if (!preg_match('/^[A-Za-z]+$/', $lastName)) {
-        array_push($array, 'Last name should contain only English letters');
-    }
-    if (strlen($lastName) > 60) {
-        array_push($array, 'Last name cannot be greater than 60 chars');
-    }
-    return $array;
 }
 
-function validatePersonalInfoForm($array, $personalInfo)
+function validateFieldLength($fieldName, $filedValue, $length)
 {
-    if (empty($personalInfo)) {
-        array_push($array, 'Personal in is required field');
+    if (strlen($filedValue) > $length) {
+        return "$fieldName cannot be greater than $length";
     }
-    if (strlen($personalInfo) > 500) {
-        array_push($array, 'Personal in cannot be greater than 500 chars');
-    }
-    return $array;
 }
 
+// TODO: create function which validate user date of birth
 
 // Check for submit form
 if (filter_has_var(INPUT_POST, 'submit')) {
 
-    // Validate user input
+
     if (isset($_POST) && !empty($_POST)) {
-        $firstName = $_POST['firstName'];
-        $lastName = $_POST['lastName'];
-        $personalInfo = $_POST['personalInfo'];
+        $errors = [];
+
+        // check on empty fields
+        $errors[] = isFieldEmpty('First name', $_POST['firstName']);
+        $errors[] = isFieldEmpty('Last name', $_POST['lastName']);
+        $errors[] = isFieldEmpty('Personal Info', $_POST['personalInfo']);
+
+        // validate fields
+        $errors[] = validateField($_POST['firstName'], 'First name');
+        $errors[] = validateField($_POST['lastName'], 'Last name');
+
+        // validate fields length
+        $errors[] = validateFieldLength('First name', $_POST['firstName'], 60);
+        $errors[] = validateFieldLength('Last name', $_POST['lastName'], 60);
+        $errors[] = validateFieldLength('Personal info', $_POST['personalInfo'], 60);
+
     }
-
-    $isFirstNameValid = !empty(validateFirstNameForm($errorMsg, $firstName));
-    $isLastNameValid = !empty(validateLastNameForm($errorMsg, $lastName));
-    $isPersonalInfoValid = !empty(validatePersonalInfoForm($errorMsg, $personalInfo));
-
-    $errorMsg = validateFirstNameForm($errorMsg, $firstName);
-    $errorMsg = validateLastNameForm($errorMsg, $lastName);
-    $errorMsg = validatePersonalInfoForm($errorMsg, $personalInfo);
 }
 ?>
 
@@ -73,17 +52,17 @@ if (filter_has_var(INPUT_POST, 'submit')) {
     <div class="container pt-5">
         <h1>Profile Form</h1>
         <hr>
-        <?php if (!empty($errorMsg)): ?>
+        <?php if (array_filter($errors)): ?>
             <div class="alert alert-danger" role="alert">
                 <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
-                <?php foreach ($errorMsg as $error): ?>
+                <?php foreach ($errors as $error): ?>
                     <p><?php echo $error ?></p>
                 <?php endforeach; ?>
             </div>
         <?php endif; ?>
-        <?php if (filter_has_var(INPUT_POST, 'submit') && empty($errorMsg)): ?>
+        <?php if (filter_has_var(INPUT_POST, 'submit') && !array_filter($errors)): ?>
             <div class="alert alert-success" role="alert"><h4 class="alert-heading">Well
                     done!</h4> <?php echo "Thank You {$_POST['firstName']} {$_POST['lastName']}"; ?>
                 <button type="button" class="close" data-dismiss="alert" aria-label="Close">
@@ -96,14 +75,14 @@ if (filter_has_var(INPUT_POST, 'submit')) {
                 <label class="col-sm-2 col-form-label">First Name</label>
                 <div class="col-sm-5">
                     <input type="text" class="form-control" placeholder="First Name" name="firstName"
-                           value="<?php if ($isFirstNameValid) echo $firstName; ?>">
+                           value="<?php if (isset($_POST['firstName']) && !empty($_POST['firstName'])) echo $_POST['firstName']; ?>">
                 </div>
             </div>
             <div class="form-group">
                 <label class="col-sm-5 col-form-label">Last Name</label>
                 <div class="col-sm-5 col-form-label">
                     <input type="text" class="form-control" placeholder="Last Name" name="lastName"
-                           value="<?php if ($isLastNameValid) echo $lastName; ?>">
+                           value="<?php if (isset($_POST['lastName']) && !empty($_POST['lastName'])) echo $_POST['lastName']; ?>">
                 </div>
             </div>
             <div class="form-group">
@@ -149,10 +128,11 @@ if (filter_has_var(INPUT_POST, 'submit')) {
             </fieldset>
             <div class="form-group col">
                 <label>Personal info</label>
+                <!-- TODO: keep text area value on validation fail -->
                 <textarea class="form-control" name="personalInfo" rows="3"
-                          placeholder="<?php if ($isPersonalInfoValid) echo $personalInfo; ?>"></textarea>
+                          placeholder="<?php if (isset($_POST['personalInfo']) && !empty($_POST['personalInfo'])) echo $_POST['personalInfo']; ?>">
+                </textarea>
             </div>
-
             <div class="form-group col">
                 <input type="submit" class="btn-dark" name="submit">
             </div>

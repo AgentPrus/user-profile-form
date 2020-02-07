@@ -1,4 +1,5 @@
 <?php
+include('upload.php');
 
 function isFieldEmpty($fieldName, $filedValue)
 {
@@ -21,10 +22,10 @@ function validateFieldLength($fieldName, $filedValue, $length)
     }
 }
 
-function validateDateOfBirth($birthDay)
+function validateDateOfBirth($birthDay, $age)
 {
-    if (time() < strtotime('+18 years', strtotime($birthDay))) {
-        return 'You must be 18 years old or above';
+    if (time() < strtotime("+$age years", strtotime($birthDay))) {
+        return "You must be $age years old or above";
     }
 }
 
@@ -39,6 +40,7 @@ if (filter_has_var(INPUT_POST, 'submit')) {
         $errors[] = isFieldEmpty('First name', $_POST['firstName']);
         $errors[] = isFieldEmpty('Last name', $_POST['lastName']);
         $errors[] = isFieldEmpty('Personal Info', $_POST['personalInfo']);
+        $errors[] = isFieldEmpty('Date of Birth', $_POST['dateOfBirth']);
 
         // validate fields
         $errors[] = validateField($_POST['firstName'], 'First name');
@@ -49,13 +51,19 @@ if (filter_has_var(INPUT_POST, 'submit')) {
         $errors[] = validateFieldLength('Last name', $_POST['lastName'], 60);
         $errors[] = validateFieldLength('Personal info', $_POST['personalInfo'], 60);
 
-        //validate user age
-        $errors[] = validateDateOfBirth($_POST['dateOfBirth']);
-    }
+        // validate user age
+        $errors[] = validateDateOfBirth($_POST['dateOfBirth'], 18);
 
-    // Uploaded profile files
-    $profileImage = $_FILES['image'];
-    $profileCV = $_FILES['resume'];
+//        TODO: make uploading files required or not according to mentor answer
+
+        // Add an error if it occurred while loading the file
+        if (!empty($uploadedCVResult) && !is_bool($uploadedCVResult)) {
+            $errors['fileUploadError'] = $uploadedCVResult;
+        }
+        if (!empty($uploadedImageResult) && !is_bool($uploadedImageResult)) {
+            $errors['imageUploadError'] = $uploadedImageResult;
+        }
+    }
 }
 ?>
 
@@ -138,35 +146,48 @@ if (filter_has_var(INPUT_POST, 'submit')) {
                     <label class="form-check-label">NODE JS</label>
                 </div>
             </fieldset>
-            <fieldset class="form-row col">
-                <legend>Please Upload Files</legend>
-                <div class="container-sm form-row">
-                    <div class="col-auto">
-                        <div class="custom-file">
-                            <input type="file" class="custom-file-input" name="image">
-                            <label class="custom-file-label">
-                                <?php if (isset($_FILES['image']) && !empty($_FILES['image'])) {
-                                    echo $_FILES['image']['name'];
-                                } else {
-                                    echo 'Profile image';
-                                } ?>
-                            </label>
-                        </div>
+            <div class="form-group col">
+                <h5>Upload your files</h5>
+                <?php if (empty($uploadedImageResult) && !isset($uploadedImageResult)): ?>
+                    <div></div>
+                <?php elseif ($uploadedImageResult === true): ?>
+                    <div class="alert alert-dismissible alert-success">
+                        <button type="button" class="close" data-dismiss="alert">&times;</button>
+                        <strong>Well done!</strong> Your image successfully uploaded.
                     </div>
-                    <div class="col-auto pb-3">
-                        <div class="custom-file">
-                            <input type="file" class="custom-file-input" name="resume">
-                            <label class="custom-file-label">
-                                <?php if (isset($_FILES['resume']) && !empty($_FILES['resume'])) {
-                                    echo $_FILES['resume']['name'];
-                                } else {
-                                    echo 'Profile CV';
-                                } ?>
-                            </label>
-                        </div>
+                <?php else: ?>
+                    <div class="alert alert-dismissible alert-danger">
+                        <button type="button" class="close" data-dismiss="alert">&times;</button>
+                        <strong>Oh snap!</strong> <?php echo $errors['imageUploadError']; ?>
                     </div>
+                <?php endif; ?>
+                <div class="container-sm pb-3">
+                    <input type="file" name="image" class="form-control-file">
+                    <small class="form-text text-muted">Here upload your Profile photo. It must has .jpg, .png,
+                        .jpeg
+                        extensions.<br> Max file size 2MB
+                    </small>
                 </div>
-            </fieldset>
+                <?php if (empty($uploadedCVResult) && !isset($uploadedCVResult)): ?>
+                    <div></div>
+                <?php elseif ($uploadedCVResult === true): ?>
+                    <div class="alert alert-dismissible alert-success">
+                        <button type="button" class="close" data-dismiss="alert">&times;</button>
+                        <strong>Well done!</strong> Your CV successfully uploaded.
+                    </div>
+                <?php else: ?>
+                    <div class="alert alert-dismissible alert-danger">
+                        <button type="button" class="close" data-dismiss="alert">&times;</button>
+                        <strong>Oh snap!</strong> <?php echo $errors['fileUploadError']; ?>
+                    </div>
+                <?php endif; ?>
+                <div class="container-sm">
+                    <input type="file" name="resume">
+                    <small class="form-text text-muted">Here upload your CV. It must has .doc, .pdf, docx
+                        extensions.<br> Max file size 2MB
+                    </small>
+                </div>
+            </div>
             <div class="form-group col pt-3">
                 <label>Personal info</label>
                 <textarea class="form-control" name="personalInfo"

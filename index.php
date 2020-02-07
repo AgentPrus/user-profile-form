@@ -52,6 +52,10 @@ if (filter_has_var(INPUT_POST, 'submit')) {
         //validate user age
         $errors[] = validateDateOfBirth($_POST['dateOfBirth']);
     }
+
+    // Uploaded profile files
+    $profileImage = $_FILES['image'];
+    $profileCV = $_FILES['resume'];
 }
 ?>
 
@@ -77,7 +81,7 @@ if (filter_has_var(INPUT_POST, 'submit')) {
                 </button>
             </div>
         <?php endif; ?>
-        <form action="<?php htmlspecialchars($_SERVER['PHP_SELF']) ?>" method="post">
+        <form action="<?php htmlspecialchars($_SERVER['PHP_SELF']) ?>" method="post" enctype="multipart/form-data">
             <div class="form-group">
                 <label class="col-sm-2 col-form-label">First Name</label>
                 <div class="col-sm-5">
@@ -96,7 +100,7 @@ if (filter_has_var(INPUT_POST, 'submit')) {
                 <label class="col-sm-5 col-form-label">Data of Birth</label>
                 <div class="col-sm-5 col-form-label">
                     <input type="date" class="form-control" placeholder="Data of Birth" name="dateOfBirth"
-                           value="<?php if (isset($_POST['dateOfBirth']) && !empty($_POST['dateOfBirth'])) echo htmlspecialchars(date( $_POST['dateOfBirth'])); ?>">
+                           value="<?php if (isset($_POST['dateOfBirth']) && !empty($_POST['dateOfBirth'])) echo htmlspecialchars(date($_POST['dateOfBirth'])); ?>">
                 </div>
             </div>
 
@@ -134,7 +138,36 @@ if (filter_has_var(INPUT_POST, 'submit')) {
                     <label class="form-check-label">NODE JS</label>
                 </div>
             </fieldset>
-            <div class="form-group col">
+            <fieldset class="form-row col">
+                <legend>Please Upload Files</legend>
+                <div class="container-sm form-row">
+                    <div class="col-auto">
+                        <div class="custom-file">
+                            <input type="file" class="custom-file-input" name="image">
+                            <label class="custom-file-label">
+                                <?php if (isset($_FILES['image']) && !empty($_FILES['image'])) {
+                                    echo $_FILES['image']['name'];
+                                } else {
+                                    echo 'Profile image';
+                                } ?>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-auto pb-3">
+                        <div class="custom-file">
+                            <input type="file" class="custom-file-input" name="resume">
+                            <label class="custom-file-label">
+                                <?php if (isset($_FILES['resume']) && !empty($_FILES['resume'])) {
+                                    echo $_FILES['resume']['name'];
+                                } else {
+                                    echo 'Profile CV';
+                                } ?>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
+            <div class="form-group col pt-3">
                 <label>Personal info</label>
                 <textarea class="form-control" name="personalInfo"
                           rows="3"><?php if (isset($_POST['personalInfo']) && !empty($_POST['personalInfo'])) echo $_POST['personalInfo']; ?></textarea>

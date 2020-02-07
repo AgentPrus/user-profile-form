@@ -21,7 +21,12 @@ function validateFieldLength($fieldName, $filedValue, $length)
     }
 }
 
-// TODO: create function which validate user date of birth
+function validateDateOfBirth($birthDay)
+{
+    if (time() < strtotime('+18 years', strtotime($birthDay))) {
+        return 'You must be 18 years old or above';
+    }
+}
 
 // Check for submit form
 if (filter_has_var(INPUT_POST, 'submit')) {
@@ -44,6 +49,8 @@ if (filter_has_var(INPUT_POST, 'submit')) {
         $errors[] = validateFieldLength('Last name', $_POST['lastName'], 60);
         $errors[] = validateFieldLength('Personal info', $_POST['personalInfo'], 60);
 
+        //validate user age
+        $errors[] = validateDateOfBirth($_POST['dateOfBirth']);
     }
 }
 ?>
@@ -52,7 +59,7 @@ if (filter_has_var(INPUT_POST, 'submit')) {
     <div class="container pt-5">
         <h1>Profile Form</h1>
         <hr>
-        <?php if (array_filter($errors)): ?>
+        <?php if (filter_has_var(INPUT_POST, 'submit') && array_filter($errors)): ?>
             <div class="alert alert-danger" role="alert">
                 <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
@@ -88,7 +95,8 @@ if (filter_has_var(INPUT_POST, 'submit')) {
             <div class="form-group">
                 <label class="col-sm-5 col-form-label">Data of Birth</label>
                 <div class="col-sm-5 col-form-label">
-                    <input type="date" class="form-control" placeholder="Data of Birth" name="dateOfBirth">
+                    <input type="date" class="form-control" placeholder="Data of Birth" name="dateOfBirth"
+                           value="<?php if (isset($_POST['dateOfBirth']) && !empty($_POST['dateOfBirth'])) echo htmlspecialchars(date( $_POST['dateOfBirth'])); ?>">
                 </div>
             </div>
 
@@ -128,10 +136,8 @@ if (filter_has_var(INPUT_POST, 'submit')) {
             </fieldset>
             <div class="form-group col">
                 <label>Personal info</label>
-                <!-- TODO: keep text area value on validation fail -->
-                <textarea class="form-control" name="personalInfo" rows="3"
-                          placeholder="<?php if (isset($_POST['personalInfo']) && !empty($_POST['personalInfo'])) echo $_POST['personalInfo']; ?>">
-                </textarea>
+                <textarea class="form-control" name="personalInfo"
+                          rows="3"><?php if (isset($_POST['personalInfo']) && !empty($_POST['personalInfo'])) echo $_POST['personalInfo']; ?></textarea>
             </div>
             <div class="form-group col">
                 <input type="submit" class="btn-dark" name="submit">

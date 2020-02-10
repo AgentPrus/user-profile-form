@@ -1,37 +1,8 @@
 <?php
-include('upload.php');
-
-function isFieldEmpty($fieldName, $filedValue)
-{
-    if (empty($filedValue)) {
-        return "$fieldName is required";
-    }
-}
-
-function validateField($filedValue, $filedName)
-{
-    if (!empty($filedValue) && !preg_match('/^[A-Za-z]+$/', $filedValue)) {
-        return "$filedName should contain only English letters";
-    }
-}
-
-function validateFieldLength($fieldName, $filedValue, $length)
-{
-    if (strlen($filedValue) > $length) {
-        return "$fieldName cannot be greater than $length";
-    }
-}
-
-function validateDateOfBirth($birthDay, $age)
-{
-    if (time() < strtotime("+$age years", strtotime($birthDay))) {
-        return "You must be $age years old or above";
-    }
-}
+include('uploads.php');
 
 // Check for submit form
 if (filter_has_var(INPUT_POST, 'submit')) {
-
 
     if (isset($_POST) && !empty($_POST)) {
         $errors = [];
@@ -54,15 +25,14 @@ if (filter_has_var(INPUT_POST, 'submit')) {
         // validate user age
         $errors[] = validateDateOfBirth($_POST['dateOfBirth'], 18);
 
+        // Add an error if it occurred while loading the file
+        if (!empty($fileUploadResult) && !is_bool($fileUploadResult)) {
+            $errors['fileUploadError'] = $fileUploadResult;
+        }
 
-            // Add an error if it occurred while loading the file
-            if (!empty($uploadedCVResult) && !is_bool($uploadedCVResult)) {
-                $errors['fileUploadError'] = $uploadedCVResult;
-            }
-
-            if (!empty($uploadedImageResult) && !is_bool($uploadedImageResult)) {
-                $errors['imageUploadError'] = $uploadedImageResult;
-            }
+        if (!empty($imageUploadResult) && !is_bool($imageUploadResult)) {
+            $errors['imageUploadError'] = $imageUploadResult;
+        }
     }
 }
 ?>
@@ -148,9 +118,9 @@ if (filter_has_var(INPUT_POST, 'submit')) {
             </fieldset>
             <div class="form-group col">
                 <h5>Upload your files</h5>
-                <?php if (empty($uploadedImageResult) && !isset($uploadedImageResult)): ?>
+                <?php if (empty($imageUploadResult)): ?>
                     <div></div>
-                <?php elseif ($uploadedImageResult === true): ?>
+                <?php elseif ($imageUploadResult === true): ?>
                     <div class="alert alert-dismissible alert-success">
                         <button type="button" class="close" data-dismiss="alert">&times;</button>
                         <strong>Well done!</strong> Your image successfully uploaded.
@@ -168,9 +138,9 @@ if (filter_has_var(INPUT_POST, 'submit')) {
                         extensions.<br> Max file size 2MB
                     </small>
                 </div>
-                <?php if (empty($uploadedCVResult) && !isset($uploadedCVResult)): ?>
+                <?php if (empty($fileUploadResult)): ?>
                     <div></div>
-                <?php elseif ($uploadedCVResult === true): ?>
+                <?php elseif ($fileUploadResult === true): ?>
                     <div class="alert alert-dismissible alert-success">
                         <button type="button" class="close" data-dismiss="alert">&times;</button>
                         <strong>Well done!</strong> Your CV successfully uploaded.

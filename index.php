@@ -51,17 +51,18 @@ if (filter_has_var(INPUT_POST, 'submit')) {
         $errors[] = validateFieldLength('Last name', $_POST['lastName'], 60);
         $errors[] = validateFieldLength('Personal info', $_POST['personalInfo'], 60);
 
-        //validate user age
+        // validate user age
         $errors[] = validateDateOfBirth($_POST['dateOfBirth'], 18);
 
-// TODO: Simplify file error message validation logic
-        if (!empty($uploadedCVResult) && isset($uploadedCVResult) && !is_bool($uploadedCVResult)) {
-            $errors['fileUploadError'] = $uploadedCVResult;
-        }
 
-        if (!empty($uploadedImageResult) && isset($uploadedImageResult) && !is_bool($uploadedImageResult)) {
-            $errors['imageUploadError'] = $uploadedImageResult;
-        }
+            // Add an error if it occurred while loading the file
+            if (!empty($uploadedCVResult) && !is_bool($uploadedCVResult)) {
+                $errors['fileUploadError'] = $uploadedCVResult;
+            }
+
+            if (!empty($uploadedImageResult) && !is_bool($uploadedImageResult)) {
+                $errors['imageUploadError'] = $uploadedImageResult;
+            }
     }
 }
 ?>
@@ -147,19 +148,18 @@ if (filter_has_var(INPUT_POST, 'submit')) {
             </fieldset>
             <div class="form-group col">
                 <h5>Upload your files</h5>
-                <!-- TODO: Display error message on uploading files -->
-                <?php if (filter_has_var(INPUT_POST, 'submit')): ?>
-                    <?php if (empty($errors['imageUploadError'])): ?>
-                        <div class="alert alert-dismissible alert-success">
-                            <button type="button" class="close" data-dismiss="alert">&times;</button>
-                            <strong>Well done!</strong> Your image successfully uploaded.
-                        </div>
-                    <?php else: ?>
-                        <div class="alert alert-dismissible alert-danger">
-                            <button type="button" class="close" data-dismiss="alert">&times;</button>
-                            <strong>Oh snap!</strong> <?php echo $errors['imageUploadError']; ?>
-                        </div>
-                    <?php endif; ?>
+                <?php if (empty($uploadedImageResult) && !isset($uploadedImageResult)): ?>
+                    <div></div>
+                <?php elseif ($uploadedImageResult === true): ?>
+                    <div class="alert alert-dismissible alert-success">
+                        <button type="button" class="close" data-dismiss="alert">&times;</button>
+                        <strong>Well done!</strong> Your image successfully uploaded.
+                    </div>
+                <?php else: ?>
+                    <div class="alert alert-dismissible alert-danger">
+                        <button type="button" class="close" data-dismiss="alert">&times;</button>
+                        <strong>Oh snap!</strong> <?php echo $errors['imageUploadError']; ?>
+                    </div>
                 <?php endif; ?>
                 <div class="container-sm pb-3">
                     <input type="file" name="image" class="form-control-file">
@@ -168,18 +168,18 @@ if (filter_has_var(INPUT_POST, 'submit')) {
                         extensions.<br> Max file size 2MB
                     </small>
                 </div>
-                <?php if (filter_has_var(INPUT_POST, 'submit')): ?>
-                    <?php if (empty($errors['fileUploadError'])): ?>
-                        <div class="alert alert-dismissible alert-success">
-                            <button type="button" class="close" data-dismiss="alert">&times;</button>
-                            <strong>Well done!</strong> Your CV successfully uploaded.
-                        </div>
-                    <?php else: ?>
-                        <div class="alert alert-dismissible alert-danger">
-                            <button type="button" class="close" data-dismiss="alert">&times;</button>
-                            <strong>Oh snap!</strong> <?php echo $uploadedCVResult; ?>
-                        </div>
-                    <?php endif; ?>
+                <?php if (empty($uploadedCVResult) && !isset($uploadedCVResult)): ?>
+                    <div></div>
+                <?php elseif ($uploadedCVResult === true): ?>
+                    <div class="alert alert-dismissible alert-success">
+                        <button type="button" class="close" data-dismiss="alert">&times;</button>
+                        <strong>Well done!</strong> Your CV successfully uploaded.
+                    </div>
+                <?php else: ?>
+                    <div class="alert alert-dismissible alert-danger">
+                        <button type="button" class="close" data-dismiss="alert">&times;</button>
+                        <strong>Oh snap!</strong> <?php echo $errors['fileUploadError']; ?>
+                    </div>
                 <?php endif; ?>
                 <div class="container-sm">
                     <input type="file" name="resume">
@@ -187,7 +187,6 @@ if (filter_has_var(INPUT_POST, 'submit')) {
                         extensions.<br> Max file size 2MB
                     </small>
                 </div>
-
             </div>
             <div class="form-group col pt-3">
                 <label>Personal info</label>

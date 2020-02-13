@@ -11,35 +11,6 @@ $fileUploadStatus = false;
 $imageUploadResult = '';
 $fileUploadResult = '';
 
-// Form fields validation
-function isFieldEmpty($fieldName, $filedValue)
-{
-    if (empty($filedValue)) {
-        return "$fieldName is required";
-    }
-}
-
-function validateField($filedValue, $filedName)
-{
-    if (!empty($filedValue) && !preg_match('/^[A-Za-z]+$/', $filedValue)) {
-        return "$filedName should contain only English letters";
-    }
-}
-
-function validateFieldLength($fieldName, $filedValue, $length)
-{
-    if (strlen($filedValue) > $length) {
-        return "$fieldName cannot be greater than $length";
-    }
-}
-
-function validateDateOfBirth($birthDay, $age)
-{
-    if (time() < strtotime("+$age years", strtotime($birthDay))) {
-        return "You must be $age years old or above";
-    }
-}
-
 // Upload file validation
 if (isset($_FILES) && !empty($_FILES)) {
     $imageExtension = getFileExtension($_FILES['image']['name']);

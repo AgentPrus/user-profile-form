@@ -1,5 +1,7 @@
 <?php
 include('uploads.php');
+include_once('db/db.connection.php');
+include_once('db/db.setup.php');
 
 // Check for submit form
 if (filter_has_var(INPUT_POST, 'submit')) {
@@ -59,7 +61,7 @@ if (filter_has_var(INPUT_POST, 'submit')) {
                 </button>
             </div>
         <?php endif; ?>
-        <form action="<?php htmlspecialchars($_SERVER['PHP_SELF']) ?>" method="post" enctype="multipart/form-data">
+        <form action="db/db.insert.php" method="post" enctype="multipart/form-data">
             <div class="form-group">
                 <label class="col-sm-2 col-form-label">First Name</label>
                 <div class="col-sm-5">
@@ -83,14 +85,18 @@ if (filter_has_var(INPUT_POST, 'submit')) {
             </div>
 
             <fieldset class="form-group col">
-                <legend>Are you working now?</legend>
+                <legend>Your current status?</legend>
                 <div class="form-check">
-                    <input type="radio" class="form-check-input" name="options" value="No">
-                    <label class="form-check-label">Yes</label>
+                    <input type="radio" class="form-check-input" name="options" value="Working on company">
+                    <label class="form-check-label">Working on company</label>
                 </div>
                 <div class="form-check">
-                    <input type="radio" class="form-check-input" name="options" value="No">
-                    <label class="form-check-label">No</label>
+                    <input type="radio" class="form-check-input" name="options" value="I'm self-employed">
+                    <label class="form-check-label">I'm self-employed</label>
+                </div>
+                <div class="form-check">
+                    <input type="radio" class="form-check-input" name="options" value="Unemployed">
+                    <label class="form-check-label">Unemployed</label>
                 </div>
             </fieldset>
             <fieldset class="form-group col">

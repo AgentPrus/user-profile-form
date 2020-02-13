@@ -1,31 +1,40 @@
 <?php
-include('uploads.php');
 include_once('db/db.connection.php');
-include_once('db/db.setup.php');
+include('uploads.php');
 
 // Check for submit form
 if (filter_has_var(INPUT_POST, 'submit')) {
 
     if (isset($_POST) && !empty($_POST)) {
+        $firstName = $conn->real_escape_string($_POST['firstName']);
+        $lastName = $conn->real_escape_string($_POST['lastName']);
+        $email = $conn->real_escape_string($_POST['email']);
+        $dateOfBirth = $conn->real_escape_string($_POST['dateOfBirth']);
+        $userStatus = $conn->real_escape_string($_POST['options']);
+        $profileImg = $conn->real_escape_string($_FILES['image']['name']);
+        $profileInfo = $conn->real_escape_string($_POST['personalInfo']);
+
         $errors = [];
 
         // check on empty fields
-        $errors[] = isFieldEmpty('First name', $_POST['firstName']);
-        $errors[] = isFieldEmpty('Last name', $_POST['lastName']);
-        $errors[] = isFieldEmpty('Personal Info', $_POST['personalInfo']);
-        $errors[] = isFieldEmpty('Date of Birth', $_POST['dateOfBirth']);
+        $errors[] = isFieldEmpty('First name', $firstName);
+        $errors[] = isFieldEmpty('Last name', $lastName);
+        $errors[] = isFieldEmpty('Email', $email);
+        $errors[] = isFieldEmpty('Personal Info', $profileInfo);
+        $errors[] = isFieldEmpty('Date of Birth', $dateOfBirth);
 
         // validate fields
-        $errors[] = validateField($_POST['firstName'], 'First name');
-        $errors[] = validateField($_POST['lastName'], 'Last name');
+        $errors[] = validateField($firstName, 'First name');
+        $errors[] = validateField($lastName, 'Last name');
+        $errors[] = validateEmail($email);
 
         // validate fields length
-        $errors[] = validateFieldLength('First name', $_POST['firstName'], 60);
-        $errors[] = validateFieldLength('Last name', $_POST['lastName'], 60);
-        $errors[] = validateFieldLength('Personal info', $_POST['personalInfo'], 60);
+        $errors[] = validateFieldLength('First name', $firstName, 60);
+        $errors[] = validateFieldLength('Last name', $lastName, 60);
+        $errors[] = validateFieldLength('Personal info', $profileInfo, 60);
 
         // validate user age
-        $errors[] = validateDateOfBirth($_POST['dateOfBirth'], 18);
+        $errors[] = validateDateOfBirth($dateOfBirth, 18);
 
         // Add an error if it occurred while loading the file
         if (!empty($fileUploadResult) && !is_bool($fileUploadResult)) {
@@ -34,6 +43,23 @@ if (filter_has_var(INPUT_POST, 'submit')) {
 
         if (!empty($imageUploadResult) && !is_bool($imageUploadResult)) {
             $errors['imageUploadError'] = $imageUploadResult;
+        }
+
+        // Check if email unique
+        $errors[] = isUserAlreadyExists($email, $conn);
+
+        // Create user if all is ok
+        if (empty(array_filter($errors))) {
+            $createUser = "INSERT INTO users_profiles.users(first_name, last_name, email, date_of_birth, profile_img, profile_info, user_status)
+        VALUES ('$firstName', '$lastName', '$email', '$dateOfBirth', '$profileImg', '$profileInfo', '$userStatus')";
+
+            if ($conn->query($createUser) === true) {
+                echo "User successfully created";
+            } else {
+                $logMsg = "Error creating database: " . $conn->error;
+                writeLog('errors/error_log.txt', $logMsg);
+            }
+            $conn->close();
         }
     }
 }
@@ -61,7 +87,7 @@ if (filter_has_var(INPUT_POST, 'submit')) {
                 </button>
             </div>
         <?php endif; ?>
-        <form action="db/db.insert.php" method="post" enctype="multipart/form-data">
+        <form action="<?php $_SERVER['PHP_SELF'] ?>" method="post" enctype="multipart/form-data">
             <div class="form-group">
                 <label class="col-sm-2 col-form-label">First Name</label>
                 <div class="col-sm-5">
@@ -77,6 +103,13 @@ if (filter_has_var(INPUT_POST, 'submit')) {
                 </div>
             </div>
             <div class="form-group">
+                <label class="col-sm-5 col-form-label">Email</label>
+                <div class="col-sm-5 col-form-label">
+                    <input type="email" class="form-control" placeholder="Email" name="email"
+                           value="<?php if (isset($_POST['email']) && !empty($_POST['email'])) echo $_POST['email']; ?>">
+                </div>
+            </div>
+            <div class="form-group">
                 <label class="col-sm-5 col-form-label">Data of Birth</label>
                 <div class="col-sm-5 col-form-label">
                     <input type="date" class="form-control" placeholder="Data of Birth" name="dateOfBirth"
@@ -87,7 +120,7 @@ if (filter_has_var(INPUT_POST, 'submit')) {
             <fieldset class="form-group col">
                 <legend>Your current status?</legend>
                 <div class="form-check">
-                    <input type="radio" class="form-check-input" name="options" value="Working on company">
+                    <input type="radio" class="form-check-input" name="options" value="Working on company" checked>
                     <label class="form-check-label">Working on company</label>
                 </div>
                 <div class="form-check">

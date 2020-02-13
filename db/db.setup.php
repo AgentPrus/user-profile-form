@@ -1,44 +1,47 @@
 <?php
-include_once('db.connection.php');
-
 // Create database
 $createDb = "create database if not exists users_profiles";
 
 if ($conn->query($createDb) === true) {
     echo "Database created successfully" . "<br>";
 } else {
-    echo "Error creating database: " . $conn->error;
+    $logMsg = "Error creating database: " . $conn->error;
+    writeLog('errors/error_log.txt', $logMsg);
 }
 // Create tables
-$createUsersTable = "create table if not exists users_profiles.users
+$createUsersTable = "CREATE TABLE IF NOT EXISTS users_profiles.users
 (
-user_id int primary key auto_increment not null,
-first_name varchar(60) not null,
-last_name varchar(60) not null,
-date_of_birth datetime not null,
-user_status varchar(30) not null,
-profile_img varchar(100),
-profile_info varchar(500) not null
+user_id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
+first_name VARCHAR(60) NOT NULL,
+last_name VARCHAR(60) NOT NULL,
+email VARCHAR(255) NOT NULL,
+date_of_birth DATETIME NOT NULL,
+user_status VARCHAR(30) NOT NULL,
+profile_img VARCHAR(100),
+profile_info VARCHAR(500) NOT NULL
 );";
 
-$createSkillsTable = "create table if not exists users_profiles.skills
+$createSkillsTable = "CREATE TABLE IF NOT EXISTS users_profiles.skills
 (
-skill_id int primary key auto_increment,
-skill_name varchar(30) not null
+skill_id INT PRIMARY KEY AUTO_INCREMENT,
+skill_name VARCHAR(30) NOT NULL
 );";
 
-$createUserSkillsTable = "create table if not exists users_profiles.userskills
+$createUserSkillsTable = "CREATE TABLE IF NOT EXISTS users_profiles.userskills
 (
-id int primary key auto_increment not null,
-skill_id int not null,
-user_id int not null,
-foreign key (skill_id) references users_profiles.skills(skill_id) on delete cascade,
-foreign key (user_id) references users_profiles.users(user_id) on delete cascade
+id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
+skill_id INT NOT NULL,
+user_id INT NOT NULL,
+FOREIGN KEY (SKILL_ID) REFERENCES users_profiles.skills(skill_id) ON DELETE CASCADE,
+FOREIGN KEY (USER_ID) REFERENCES users_profiles.users(user_id) ON DELETE CASCADE
 );";
 
 
 if ($conn->query($createUsersTable) === true && $conn->query($createSkillsTable) === true && $conn->query($createUserSkillsTable) === true) {
     echo "Tables are successfully created" . "<br>";
 } else {
-    echo "Error creating table: " . $conn->connect_error;
+    $logMsg = "Error creating database: " . $conn->error;
+    writeLog('errors/error_log.txt', $logMsg);
 }
+
+$conn->close();

@@ -5,7 +5,7 @@ include('config/config.php');
 $conn = new mysqli(DB_SERVER_NAME, DB_USER_NAME, DB_PASSWORD);
 
 // Check connection
-if ($conn->connect_error){
+if ($conn->connect_error) {
     die("Connection failed:" . $conn->connect_error);
 } else {
     echo "Connection success" . "<br>";

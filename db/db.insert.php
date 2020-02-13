@@ -1,6 +1,6 @@
 <?php
 include('../config/config.php');
-include('./db.connection.php');
+include('db.connection.php');
 
 
 $firstName = $_POST['firstName'];

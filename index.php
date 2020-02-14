@@ -3,12 +3,12 @@ include_once('db/db.connection.php');
 include('uploads.php');
 
 // Get skills form db
-$getSkills = $conn->query('SELECT * FROM users_profiles.skills');
+$getSkills = $conn->query('SELECT * FROM skills');
+
 
 // Check for submit form
 if (array_key_exists('submit', $_POST) && filter_has_var(INPUT_POST, 'submit')) {
     if (isset($_POST) && !empty($_POST)) {
-
         $errors = [];
 
         // check on empty fields
@@ -53,19 +53,28 @@ if (array_key_exists('submit', $_POST) && filter_has_var(INPUT_POST, 'submit')) 
             $profileImg = $conn->real_escape_string($_FILES['image']['name']);
             $profileInfo = $conn->real_escape_string($_POST['personalInfo']);
 
-            $createUser = "INSERT INTO users_profiles.users(first_name, last_name, email, date_of_birth, profile_img, profile_info, user_status)
+            $createUser = "INSERT INTO users(first_name, last_name, email, date_of_birth, profile_img, profile_info, user_status)
         VALUES ('{$firstName}', '{$lastName}', '{$email}', '{$dateOfBirth}', '{$profileImg}', '{$profileInfo}', '{$userStatus}')";
 
             if ($conn->query($createUser) === true) {
+                $userId = $conn->insert_id;
                 echo "User successfully created";
             } else {
-                $logMsg = "Error creating database: " . $conn->error;
+                $logMsg = "Error on creating user: " . $conn->error;
                 writeLog('errors/error_log.txt', $logMsg);
             }
-            $conn->close();
+
+            foreach ($_POST['skills'] as $skillId) {
+                $postUserSkills = "INSERT INTO userskills (skill_id, user_id) VALUES ('$skillId', '$userId')";
+                if ($conn->query($postUserSkills) === true) {
+                    echo "User skill added";
+                } else {
+                    $logMsg = "Error on added skill: " . $conn->error;
+                    writeLog('errors/error_log.txt', $logMsg);
+                }
+            }
         }
     }
-    print_r($_POST['check_boxes_list']);
 }
 ?>
 
@@ -140,8 +149,8 @@ if (array_key_exists('submit', $_POST) && filter_has_var(INPUT_POST, 'submit')) 
                 <legend>Please Choose your skills</legend>
                 <?php while ($skill = $getSkills->fetch_assoc()): ?>
                     <div class="form-check">
-                        <input type="checkbox" class="form-check-input" name="check_boxes_list[]"
-                               value="<?php echo $skill['skill_name'] ?>">
+                        <input type="checkbox" class="form-check-input" name="skills[]"
+                               value="<?php echo $skill['skill_id'] ?>">
                         <label class="form-check-label"><?php echo strtoupper($skill['skill_name']) ?></label>
                     </div>
                 <?php endwhile; ?>

@@ -5,8 +5,8 @@ include_once('validations.php');
 $errorMsg = '';
 $successMsg = '';
 
-// Get skills form db
-$getSkills = $conn->query('SELECT * FROM users_profiles.skills');
+// Get skills from db
+$getSkills = $conn->query('SELECT * FROM skills');
 
 // Check if button pressed
 if (array_key_exists('add', $_POST)) {
@@ -16,7 +16,7 @@ if (array_key_exists('add', $_POST)) {
         // Add skill to DB
         if (empty($errorMsg)) {
             $addableSkill = $conn->real_escape_string($_POST['addSkill']);
-            $addSkill = "INSERT INTO users_profiles.skills (skill_name) VALUES ('$addableSkill')";
+            $addSkill = "INSERT INTO skills (skill_name) VALUES ('$addableSkill')";
             if ($conn->query($addSkill) === true) {
                 $successMsg = "Skill successfully added";
             } else {
@@ -34,7 +34,7 @@ if (array_key_exists('add', $_POST)) {
 <?php include('include/header.inc.php'); ?>
 <form action="<?php $_SERVER['PHP_SELF'] ?>" method="post">
     <div class="container">
-        <h1>Add skills</h1>
+        <h1>Add skill</h1>
         <?php if (!empty($errorMsg)): ?>
             <div class="alert alert-danger" role="alert">
                 <button type="button" class="close" data-dismiss="alert" aria-label="Close">
@@ -50,19 +50,24 @@ if (array_key_exists('add', $_POST)) {
                 </button>
             </div>
         <?php endif; ?>
-        <div class="form-group form-row">
-            <input type="text" class="form-control form-control-lg" name="addSkill">
-            <button type="submit" class="btn btn-success" name="add" value="Add">Add</button>
+        <div class="form-group ">
+            <div class="form-row">
+                <div class="col-10">
+                    <input type="text" class="form-control form-control-lg" name="addSkill">
+                </div>
+                <div class="col-2">
+                    <button type="submit" class="btn btn-success btn-lg" name="add" value="Add">Add</button>
+                </div>
+            </div>
         </div>
         <div class="container">
-            <h2>Skills which already exists</h2>
+            <h2>Skill which already exists</h2>
             <?php while ($skill = $getSkills->fetch_assoc()): ?>
                 <ul class="list-group list-group-flush">
                     <li class="list-group-item"><?php echo strtoupper($skill['skill_name']) ?></li>
                 </ul>
             <?php endwhile; ?>
         </div>
-    </div>
     </div>
 </form>
 <?php include('include/footer.inc.php'); ?>

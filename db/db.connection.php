@@ -2,7 +2,7 @@
 include('/Users/mprus/scripts/user-profile-form/config/config.php');
 include_once('/Users/mprus/scripts/user-profile-form/errors/errorlog.php');
 // Create connection
-$conn = new mysqli(DB_SERVER_NAME, DB_USER_NAME, DB_PASSWORD);
+$conn = new mysqli(DB_SERVER_NAME, DB_USER_NAME, DB_PASSWORD, DB_NAME);
 
 // Check connection
 if ($conn->connect_error) {

@@ -79,7 +79,7 @@ function uploadFile($fileTmpName, $fileName)
 // DB validations
 function isUserAlreadyExists($email, $conn)
 {
-    $getUsr = $conn->query("SELECT email FROM users_profiles.users WHERE email = '$email';");
+    $getUsr = $conn->query("SELECT email FROM users WHERE email = '$email';");
 
     if ($getUsr->num_rows !== 0) {
         return "User with this email is already exist";
@@ -88,7 +88,7 @@ function isUserAlreadyExists($email, $conn)
 
 function isSkillAlreadyExists($skillName, $conn)
 {
-    $skills = $conn->query("SELECT * FROM users_profiles.skills WHERE skill_name = '$skillName'");
+    $skills = $conn->query("SELECT * FROM skills WHERE skill_name = '$skillName'");
 
     if ($skills->num_rows !== 0) {
         return "This skill is already exist";

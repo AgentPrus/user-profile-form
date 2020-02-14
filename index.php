@@ -2,39 +2,34 @@
 include_once('db/db.connection.php');
 include('uploads.php');
 
-// Check for submit form
-if (filter_has_var(INPUT_POST, 'submit')) {
+// Get skills form db
+$getSkills = $conn->query('SELECT * FROM users_profiles.skills');
 
+// Check for submit form
+if (array_key_exists('submit', $_POST) && filter_has_var(INPUT_POST, 'submit')) {
     if (isset($_POST) && !empty($_POST)) {
-        $firstName = $conn->real_escape_string($_POST['firstName']);
-        $lastName = $conn->real_escape_string($_POST['lastName']);
-        $email = $conn->real_escape_string($_POST['email']);
-        $dateOfBirth = $conn->real_escape_string($_POST['dateOfBirth']);
-        $userStatus = $conn->real_escape_string($_POST['options']);
-        $profileImg = $conn->real_escape_string($_FILES['image']['name']);
-        $profileInfo = $conn->real_escape_string($_POST['personalInfo']);
 
         $errors = [];
 
         // check on empty fields
-        $errors[] = isFieldEmpty('First name', $firstName);
-        $errors[] = isFieldEmpty('Last name', $lastName);
-        $errors[] = isFieldEmpty('Email', $email);
-        $errors[] = isFieldEmpty('Personal Info', $profileInfo);
-        $errors[] = isFieldEmpty('Date of Birth', $dateOfBirth);
+        $errors[] = isFieldEmpty('First name', $_POST['firstName']);
+        $errors[] = isFieldEmpty('Last name', $_POST['lastName']);
+        $errors[] = isFieldEmpty('Email', $_POST['email']);
+        $errors[] = isFieldEmpty('Personal Info', $_POST['personalInfo']);
+        $errors[] = isFieldEmpty('Date of Birth', $_POST['dateOfBirth']);
 
         // validate fields
-        $errors[] = validateField($firstName, 'First name');
-        $errors[] = validateField($lastName, 'Last name');
-        $errors[] = validateEmail($email);
+        $errors[] = validateField($_POST['firstName'], 'First name');
+        $errors[] = validateField($_POST['lastName'], 'Last name');
+        $errors[] = validateEmail($_POST['email']);
 
         // validate fields length
-        $errors[] = validateFieldLength('First name', $firstName, 60);
-        $errors[] = validateFieldLength('Last name', $lastName, 60);
-        $errors[] = validateFieldLength('Personal info', $profileInfo, 60);
+        $errors[] = validateFieldLength('First name', $_POST['firstName'], 60);
+        $errors[] = validateFieldLength('Last name', $_POST['lastName'], 60);
+        $errors[] = validateFieldLength('Personal info', $_POST['personalInfo'], 60);
 
         // validate user age
-        $errors[] = validateDateOfBirth($dateOfBirth, 18);
+        $errors[] = validateDateOfBirth($_POST['dateOfBirth'], 18);
 
         // Add an error if it occurred while loading the file
         if (!empty($fileUploadResult) && !is_bool($fileUploadResult)) {
@@ -46,12 +41,20 @@ if (filter_has_var(INPUT_POST, 'submit')) {
         }
 
         // Check if email unique
-        $errors[] = isUserAlreadyExists($email, $conn);
+        $errors[] = isUserAlreadyExists($_POST['email'], $conn);
 
         // Create user if all is ok
         if (empty(array_filter($errors))) {
+            $firstName = $conn->real_escape_string($_POST['firstName']);
+            $lastName = $conn->real_escape_string($_POST['lastName']);
+            $email = $conn->real_escape_string($_POST['email']);
+            $dateOfBirth = $conn->real_escape_string($_POST['dateOfBirth']);
+            $userStatus = $conn->real_escape_string($_POST['options']);
+            $profileImg = $conn->real_escape_string($_FILES['image']['name']);
+            $profileInfo = $conn->real_escape_string($_POST['personalInfo']);
+
             $createUser = "INSERT INTO users_profiles.users(first_name, last_name, email, date_of_birth, profile_img, profile_info, user_status)
-        VALUES ('$firstName', '$lastName', '$email', '$dateOfBirth', '$profileImg', '$profileInfo', '$userStatus')";
+        VALUES ('{$firstName}', '{$lastName}', '{$email}', '{$dateOfBirth}', '{$profileImg}', '{$profileInfo}', '{$userStatus}')";
 
             if ($conn->query($createUser) === true) {
                 echo "User successfully created";
@@ -62,6 +65,7 @@ if (filter_has_var(INPUT_POST, 'submit')) {
             $conn->close();
         }
     }
+    print_r($_POST['check_boxes_list']);
 }
 ?>
 
@@ -133,27 +137,14 @@ if (filter_has_var(INPUT_POST, 'submit')) {
                 </div>
             </fieldset>
             <fieldset class="form-group col">
-                <legend>Please Choose Technologies Which You Know</legend>
-                <div class="form-check">
-                    <input type="checkbox" class="form-check-input" name="check_boxes_list[]" value="JS">
-                    <label class="form-check-label">JS</label>
-                </div>
-                <div class="form-check">
-                    <input type="checkbox" class="form-check-input" name="check_boxes_list[]" value="CSS">
-                    <label class="form-check-label">CSS</label>
-                </div>
-                <div class="form-check">
-                    <input type="checkbox" class="form-check-input" name="check_boxes_list[]" value="HTML">
-                    <label class="form-check-label">HTML</label>
-                </div>
-                <div class="form-check">
-                    <input type="checkbox" class="form-check-input" name="check_boxes_list[]" value="PHP">
-                    <label class="form-check-label">PHP</label>
-                </div>
-                <div class="form-check">
-                    <input type="checkbox" class="form-check-input" name="check_boxes_list[]" value="NODEJS">
-                    <label class="form-check-label">NODE JS</label>
-                </div>
+                <legend>Please Choose your skills</legend>
+                <?php while ($skill = $getSkills->fetch_assoc()): ?>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" name="check_boxes_list[]"
+                               value="<?php echo $skill['skill_name'] ?>">
+                        <label class="form-check-label"><?php echo strtoupper($skill['skill_name']) ?></label>
+                    </div>
+                <?php endwhile; ?>
             </fieldset>
             <div class="form-group col">
                 <h5>Upload your files</h5>
@@ -164,10 +155,11 @@ if (filter_has_var(INPUT_POST, 'submit')) {
                         <button type="button" class="close" data-dismiss="alert">&times;</button>
                         <strong>Well done!</strong> Your image successfully uploaded.
                     </div>
-                <?php else: ?>
+                <?php elseif (isset($errors['imageUploadError']) && !empty($errors['imageUploadError'])): ?>
                     <div class="alert alert-dismissible alert-danger">
                         <button type="button" class="close" data-dismiss="alert">&times;</button>
-                        <strong>Oh snap!</strong> <?php echo $errors['imageUploadError']; ?>
+                        <strong>Oh snap!</strong>
+                        <?php echo $errors['imageUploadError']; ?>
                     </div>
                 <?php endif; ?>
                 <div class="container-sm pb-3">
@@ -184,10 +176,11 @@ if (filter_has_var(INPUT_POST, 'submit')) {
                         <button type="button" class="close" data-dismiss="alert">&times;</button>
                         <strong>Well done!</strong> Your CV successfully uploaded.
                     </div>
-                <?php else: ?>
+                <?php elseif (isset($errors['fileUploadError']) && !empty($errors['fileUploadError'])): ?>
                     <div class="alert alert-dismissible alert-danger">
                         <button type="button" class="close" data-dismiss="alert">&times;</button>
-                        <strong>Oh snap!</strong> <?php echo $errors['fileUploadError']; ?>
+                        <strong>Oh snap!</strong>
+                        <?php echo $errors['fileUploadError']; ?>
                     </div>
                 <?php endif; ?>
                 <div class="container-sm">
@@ -203,7 +196,7 @@ if (filter_has_var(INPUT_POST, 'submit')) {
                           rows="3"><?php if (isset($_POST['personalInfo']) && !empty($_POST['personalInfo'])) echo $_POST['personalInfo']; ?></textarea>
             </div>
             <div class="form-group col">
-                <input type="submit" class="btn-dark" name="submit">
+                <input type="submit" class="btn-dark" name="submit" value="Submit">
             </div>
         </form>
     </div>

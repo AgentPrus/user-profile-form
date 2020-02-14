@@ -1,4 +1,5 @@
 <?php
+include_once('db.connection.php');
 // Create database
 $createDb = "create database if not exists users_profiles";
 
@@ -43,5 +44,3 @@ if ($conn->query($createUsersTable) === true && $conn->query($createSkillsTable)
     $logMsg = "Error creating database: " . $conn->error;
     writeLog('errors/error_log.txt', $logMsg);
 }
-
-$conn->close();

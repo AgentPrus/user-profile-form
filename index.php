@@ -63,7 +63,7 @@ if (array_key_exists('submit', $_POST) && filter_has_var(INPUT_POST, 'submit')) 
                 $logMsg = "Error on creating user: " . $conn->error;
                 writeLog('errors/error_log.txt', $logMsg);
             }
-
+            // TODO: Make skill insertion by using insert multiply
             foreach ($_POST['skills'] as $skillId) {
                 $postUserSkills = "INSERT INTO userskills (skill_id, user_id) VALUES ('$skillId', '$userId')";
                 if ($conn->query($postUserSkills) === true) {
@@ -132,6 +132,7 @@ if (array_key_exists('submit', $_POST) && filter_has_var(INPUT_POST, 'submit')) 
 
             <fieldset class="form-group col">
                 <legend>Your current status?</legend>
+                <!-- TODO: Change radio btn values-->
                 <div class="form-check">
                     <input type="radio" class="form-check-input" name="options" value="Working on company" checked>
                     <label class="form-check-label">Working on company</label>

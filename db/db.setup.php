@@ -10,6 +10,7 @@ if ($conn->query($createDb) === true) {
     writeLog('errors/error_log.txt', $logMsg);
 }
 // Create tables
+// TODO: make user status int according to radio buttons
 $createUsersTable = "CREATE TABLE IF NOT EXISTS users_profiles.users
 (
 user_id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,

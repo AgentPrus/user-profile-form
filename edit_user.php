@@ -1,19 +1,19 @@
 <?php
 include_once('db/db.connection.php');
-$userSkills = [];
 $userId = $conn->real_escape_string($_GET['id']);
 
 $getUser = $conn->query("SELECT * FROM users WHERE user_id = '$userId'");
-$getUserSkills = $conn->query("SELECT skill_id FROM userskills WHERE user_id = '$userId'");
+$getUserSkills = $conn->query("SELECT skills.skill_id, skills.skill_name 
+FROM skills 
+JOIN userskills on userskills.skill_id = skills.skill_id");
 $getAllSkills = $conn->query("SELECT * FROM skills");
 
 $userData = $getUser->fetch_assoc();
 
 while ($row = $getUserSkills->fetch_assoc()) {
-    $userSkills[] = $row['skill_id'];
+    $userData['user_skill_list'][] = $row;
 }
-var_dump(date('m-d-Y', strtotime($userData['date_of_birth'])));
-
+print_r($userData);
 ?>
 
 <?php include('include/header.inc.php'); ?>
@@ -74,7 +74,8 @@ var_dump(date('m-d-Y', strtotime($userData['date_of_birth'])));
                 <div class="form-check">
                     <input type="checkbox" class="form-check-input" name="skills[]"
                            value="<?php echo $skill['skill_id'] ?>"
-                        <?php if (in_array($skill['skill_id'], $userSkills)): ?> checked<?php endif; ?>>
+                        <?php if (in_array($skill['skill_id'], array_column($userData['user_skill_list'], 'skill_id'))): ?>
+                            checked<?php endif; ?>>
                     <label class="form-check-label"><?php echo strtoupper($skill['skill_name']) ?></label>
                 </div>
             <?php endwhile; ?>

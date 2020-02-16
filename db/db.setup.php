@@ -1,7 +1,7 @@
 <?php
 include_once('db.connection.php');
 // Create database
-$createDb = "create database if not exists users_profiles";
+$createDb = "CREATE DATABASE IF NOT EXISTS users_profiles";
 
 if ($conn->query($createDb) === true) {
     echo "Database created successfully" . "<br>";
@@ -10,7 +10,6 @@ if ($conn->query($createDb) === true) {
     writeLog('errors/error_log.txt', $logMsg);
 }
 // Create tables
-// TODO: make user status int according to radio buttons
 $createUsersTable = "CREATE TABLE IF NOT EXISTS users_profiles.users
 (
 user_id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
@@ -18,7 +17,7 @@ first_name VARCHAR(60) NOT NULL,
 last_name VARCHAR(60) NOT NULL,
 email VARCHAR(255) NOT NULL,
 date_of_birth DATETIME NOT NULL,
-user_status VARCHAR(30) NOT NULL,
+user_status INT NOT NULL,
 profile_img VARCHAR(100),
 profile_info VARCHAR(500) NOT NULL
 );";

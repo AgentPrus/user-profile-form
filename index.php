@@ -129,24 +129,23 @@ if (array_key_exists('submit', $_POST) && filter_has_var(INPUT_POST, 'submit')) 
                            value="<?php if (isset($_POST['dateOfBirth']) && !empty($_POST['dateOfBirth'])) echo htmlspecialchars(date($_POST['dateOfBirth'])); ?>">
                 </div>
             </div>
-
             <fieldset class="form-group col">
                 <legend>Your current status?</legend>
-                <!-- TODO: Change radio btn values-->
                 <div class="form-check">
-                    <input type="radio" class="form-check-input" name="options" value="Working on company" checked>
+                    <input type="radio" class="form-check-input" name="options" value="0" checked>
                     <label class="form-check-label">Working on company</label>
                 </div>
                 <div class="form-check">
-                    <input type="radio" class="form-check-input" name="options" value="I'm self-employed">
+                    <input type="radio" class="form-check-input" name="options" value="1">
                     <label class="form-check-label">I'm self-employed</label>
                 </div>
                 <div class="form-check">
-                    <input type="radio" class="form-check-input" name="options" value="Unemployed">
+                    <input type="radio" class="form-check-input" name="options" value="2">
                     <label class="form-check-label">Unemployed</label>
                 </div>
             </fieldset>
             <fieldset class="form-group col">
+                <!-- TODO: Validate if skills table is empty -->
                 <legend>Please Choose your skills</legend>
                 <?php while ($skill = $getSkills->fetch_assoc()): ?>
                     <div class="form-check">

@@ -1,13 +1,18 @@
 <?php
 include_once('db/db.connection.php');
-
+$userSkills = [];
 $userId = $conn->real_escape_string($_GET['id']);
+
 $getUser = $conn->query("SELECT * FROM users WHERE user_id = '$userId'");
+$getUserSkills = $conn->query("SELECT skill_id FROM userskills WHERE user_id = '$userId'");
+$getAllSkills = $conn->query("SELECT * FROM skills");
+
 $userData = $getUser->fetch_assoc();
 
-print_r($userData);
-
-echo date('"m/d/Y"', strtotime($userData['date_of_birth'])) . "<br>";
+while ($row = $getUserSkills->fetch_assoc()) {
+    $userSkills[] = $row['skill_id'];
+}
+var_dump(date('m-d-Y', strtotime($userData['date_of_birth'])));
 
 ?>
 
@@ -38,26 +43,41 @@ echo date('"m/d/Y"', strtotime($userData['date_of_birth'])) . "<br>";
         <div class="form-group">
             <label class="col-sm-5 col-form-label">Data of Birth</label>
             <div class="col-sm-5 col-form-label">
-                <input type="date" class="form-control" placeholder="Data of Birth" name="date_of_birth"
-                       value="12-12-2020">
+                <!-- TODO: keep user birthday as a default value-->
+                <input type="date" class="form-control" placeholder="Data of Birth" name="dateOfBirth"
+                       value="<?php echo htmlspecialchars(date('m-d-Y', strtotime($userData['date_of_birth']))); ?>">
             </div>
         </div>
         <fieldset class="form-group col">
             <legend>Your current status?</legend>
-            <!-- TODO: Get user current status and display it-->
-            <!-- TODO: Change radio btn values-->
+            <!-- TODO: make radio buttons by using loop -->
             <div class="form-check">
-                <input type="radio" class="form-check-input" name="options" value="Working on company" checked>
+                <input type="radio" class="form-check-input" name="options"
+                       value="0"<?php if ($userData['user_status'] == 0): ?> checked<?php endif; ?>>
                 <label class="form-check-label">Working on company</label>
             </div>
             <div class="form-check">
-                <input type="radio" class="form-check-input" name="options" value="I'm self-employed">
+                <input type="radio" class="form-check-input" name="options"
+                       value="1"<?php if ($userData['user_status'] == 1): ?> checked<?php endif; ?>>
                 <label class="form-check-label">I'm self-employed</label>
             </div>
             <div class="form-check">
-                <input type="radio" class="form-check-input" name="options" value="Unemployed">
+                <input type="radio" class="form-check-input" name="options"
+                       value="2" <?php if ($userData['user_status'] == 2): ?> checked<?php endif; ?>>
                 <label class="form-check-label">Unemployed</label>
             </div>
+        </fieldset>
+        <fieldset class="form-group col">
+            <!-- TODO: Validate if skills table is empty -->
+            <legend>Please Choose your skills</legend>
+            <?php while ($skill = $getAllSkills->fetch_assoc()): ?>
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" name="skills[]"
+                           value="<?php echo $skill['skill_id'] ?>"
+                        <?php if (in_array($skill['skill_id'], $userSkills)): ?> checked<?php endif; ?>>
+                    <label class="form-check-label"><?php echo strtoupper($skill['skill_name']) ?></label>
+                </div>
+            <?php endwhile; ?>
         </fieldset>
         <div class="form-group col pt-3">
             <label>Personal info</label>

@@ -26,6 +26,7 @@ if (isset($_POST['login']) && !empty($_POST['login'])) {
                     $_SESSION['user_id'] = $row['id'];
                     $_SESSION['name'] = $row['username'];
                     $_SESSION['email'] = $row['email'];
+                    $_SESSION['user_role'] = $row['user_role'];
 
                     header('Location: /user-profile-form/user_list.php');
                 } else {
@@ -33,6 +34,7 @@ if (isset($_POST['login']) && !empty($_POST['login'])) {
                     $_SESSION['user_id'] = $row['id'];
                     $_SESSION['name'] = $row['username'];
                     $_SESSION['email'] = $row['email'];
+                    $_SESSION['user_role'] = $row['user_role'];
 
                     header('Location: /user-profile-form/index.php');
                 }

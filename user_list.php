@@ -2,7 +2,17 @@
 include_once('db/db.connection.php');
 // Get users
 $getUsers = $conn->query('SELECT * FROM users');
+session_start();
 
+if(isset($_SESSION) && !empty($_SESSION)) {
+    if($_SESSION['user_role'] != 'admin'){
+        header('HTTP/1.0 403 Forbidden');
+        die('You are not allowed to access this page.');
+    }
+} else {
+    header('HTTP/1.0 403 Forbidden');
+    die('You are not allowed to access this page.');
+}
 ?>
 
 <?php include('include/header.inc.php'); ?>

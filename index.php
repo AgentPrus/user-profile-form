@@ -8,9 +8,12 @@ session_start();
 $getSkills = $conn->query('SELECT * FROM skills');
 
 // Auto field inputs by register data
-if(isset($_SESSION) && !empty($_SESSION)){
+if (isset($_SESSION) && !empty($_SESSION)) {
     $_POST['email'] = $_SESSION['email'];
     $_POST['firstName'] = $_SESSION['name'];
+} else {
+    header('HTTP/1.0 403 Forbidden');
+    die('You are not allowed to access this page.');
 }
 
 // Check for submit form

@@ -30,12 +30,16 @@ if (isset($_POST['register']) && !empty($_POST['register'])) {
         $password = $conn->real_escape_string($_POST['password']);
         $hashed_pwd = password_hash($password, PASSWORD_DEFAULT);
 
-        $register_user = "INSERT INTO register_users (username, email, password) 
-    VALUES ('$username', '$email', '$hashed_pwd')";
+        $register_user = "INSERT INTO register_users (username, email, password, user_role) 
+    VALUES ('$username', '$email', '$hashed_pwd', 'user')";
 
         if ($conn->query($register_user) === TRUE) {
             echo "New user successfully registered";
-            header('Location: /user-profile-form/auth/auth.login.php');
+            session_start();
+//            $_SESSION['user_id'] = $row['id']; TODO: store user id into session
+            $_SESSION['name'] = $username;
+            $_SESSION['email'] = $email;
+            header('Location: /user-profile-form/index.php');
         } else {
             $logMsg = "Error on register user: " . $conn->error;
             echo $logMsg;

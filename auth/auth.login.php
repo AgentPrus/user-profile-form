@@ -21,18 +21,26 @@ if (isset($_POST['login']) && !empty($_POST['login'])) {
             if ($password_check == false) {
                 $errors[] = 'wrong password';
             } else {
-                session_start();
-                $_SESSION['user_id'] = $row['id'];
-                $_SESSION['name'] = $row['username'];
-                $_SESSION['email'] = $row['email'];
+                if ($row['user_role'] == 'admin') {
+                    session_start();
+                    $_SESSION['user_id'] = $row['id'];
+                    $_SESSION['name'] = $row['username'];
+                    $_SESSION['email'] = $row['email'];
 
-                header('Location: /user-profile-form/auth/auth.home.php');
+                    header('Location: /user-profile-form/user_list.php');
+                } else {
+                    session_start();
+                    $_SESSION['user_id'] = $row['id'];
+                    $_SESSION['name'] = $row['username'];
+                    $_SESSION['email'] = $row['email'];
+
+                    header('Location: /user-profile-form/index.php');
+                }
             }
         } else {
             $errors[] = 'No user with this email';
         }
     }
-    print_r($errors);
 }
 
 

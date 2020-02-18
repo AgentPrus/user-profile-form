@@ -2,9 +2,19 @@
 include_once('db/db.connection.php');
 include('uploads.php');
 
+session_start();
+
 // Get skills form db
 $getSkills = $conn->query('SELECT * FROM skills');
 
+// Auto field inputs by register data
+if (isset($_SESSION) && !empty($_SESSION)) {
+    $_POST['email'] = $_SESSION['email'];
+    $_POST['firstName'] = $_SESSION['name'];
+} else {
+    header('HTTP/1.0 403 Forbidden');
+    die('You are not allowed to access this page.');
+}
 
 // Check for submit form
 if (array_key_exists('submit', $_POST) && filter_has_var(INPUT_POST, 'submit')) {
